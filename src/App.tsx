@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { useEffect, useRef, useState } from "react";
 
 type Question = { char: string; romaji: string };
@@ -91,19 +92,21 @@ function App() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [text, setText] = useState("");
   const [questionQueue, setQuestionQueue] = useState(getInitialQuestionQueue());
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, [inputRef]);
 
   useEffect(() => {
-    if (text === questionQueue[0].romaji) {
+    if (text === questionQueue[currentIndex].romaji) {
       // Correct answer, move to next question
       let nextIndex = Math.floor(Math.random() * quiz.length);
-      while (questionQueue.includes(quiz[nextIndex])) {
+      while (questionQueue.slice(currentIndex).includes(quiz[nextIndex])) {
         nextIndex = Math.floor(Math.random() * quiz.length);
       }
-      setQuestionQueue((prev) => [...prev.slice(1), quiz[nextIndex]]);
+      setQuestionQueue((prev) => [...prev, quiz[nextIndex]]);
+      setCurrentIndex((prev) => prev + 1);
       setText("");
     }
   }, [text, questionQueue]);
@@ -111,14 +114,26 @@ function App() {
   return (
     <div className="min-h-svh text-center flex flex-col items-center justify-center gap-8 p-4">
       <p className="opacity-50">Write out the character with latin alphabet</p>
-      <div>
-        <span className="text-8xl">{questionQueue[0].char}</span>
+      <div className="h-24 overflow-hidden w-full">
         {questionQueue.length > 1 &&
-          questionQueue
-            .slice(1)
-            .map((question) => (
-              <span className="text-4xl opacity-50 ml-4">{question.char}</span>
-            ))}
+          questionQueue.map((question, index) => (
+            <span
+              className={classNames(
+                "absolute transition-all duration-500 origin-center text-6xl",
+                {
+                  "opacity-0 text-green-500": index < currentIndex,
+                  "opacity-50": index > currentIndex,
+                }
+              )}
+              style={{
+                transform: `translateX(${
+                  -50 + (index - currentIndex) * 100
+                }%) scale(${index > currentIndex ? 0.5 : 1})`,
+              }}
+            >
+              {question.char}
+            </span>
+          ))}
       </div>
       <div className="card">
         <input
