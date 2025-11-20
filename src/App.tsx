@@ -93,13 +93,23 @@ function App() {
   const [text, setText] = useState("");
   const [questionQueue, setQuestionQueue] = useState(getInitialQuestionQueue());
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, [inputRef]);
 
   useEffect(() => {
-    if (text === questionQueue[currentIndex].romaji) {
+    const handler = () => {
+      setWindowHeight(window.visualViewport?.height || window.innerHeight);
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  });
+
+  useEffect(() => {
+    if (text.toLowerCase() === questionQueue[currentIndex].romaji) {
       // Correct answer, move to next question
       let nextIndex = Math.floor(Math.random() * quiz.length);
       while (questionQueue.slice(currentIndex).includes(quiz[nextIndex])) {
@@ -112,12 +122,16 @@ function App() {
   }, [text, questionQueue]);
 
   return (
-    <div className="min-h-svh text-center flex flex-col items-center justify-center gap-8 p-4">
+    <div
+      className="w-full text-center flex flex-col items-center justify-center gap-8"
+      style={{ minHeight: windowHeight }}
+    >
       <p className="opacity-50">Write out the character with latin alphabet</p>
-      <div className="h-24 overflow-hidden w-full">
+      <div className="relative h-24 overflow-hidden w-full">
         {questionQueue.length > 1 &&
           questionQueue.map((question, index) => (
             <span
+              key={question.char}
               className={classNames(
                 "absolute transition-all duration-500 origin-center text-6xl",
                 {
@@ -135,16 +149,14 @@ function App() {
             </span>
           ))}
       </div>
-      <div className="card">
-        <input
-          ref={inputRef}
-          type="text"
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-          }}
-        />
-      </div>
+      <input
+        ref={inputRef}
+        type="text"
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+        }}
+      />
     </div>
   );
 }
