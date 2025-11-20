@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import "./App.css";
 
 const quiz = [
   { char: "あ", romaji: "a" },
@@ -97,11 +96,11 @@ function App() {
   }, [text, question]);
 
   return (
-    <>
-      <p className="read-the-docs">
-        Write out the character with latin alphabet
-      </p>
-      <h1>{question.char}</h1>
+    <div className="min-h-svh text-center flex flex-col items-center justify-center gap-8 p-4">
+      <p className="opacity-50">Write out the character with latin alphabet</p>
+      <div>
+        <span className="text-8xl">{question.char}</span>
+      </div>
       <div className="card">
         <input
           ref={inputRef}
@@ -128,7 +127,7 @@ function App() {
           }}
         />
       </div>
-    </>
+    </div>
   );
 }
 

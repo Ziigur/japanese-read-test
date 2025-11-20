@@ -14,22 +14,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 6rem;
-  line-height: 1.1;
-}
-
 input {
   font: inherit;
-  font-size: 1.2rem;
   padding: 0.25em 0.5em;
   border: none;
   border-radius: 0.25em;
