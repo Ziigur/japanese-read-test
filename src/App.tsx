@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-const quiz = [
+type Question = { char: string; romaji: string };
+
+const quiz: Question[] = [
   { char: "あ", romaji: "a" },
   { char: "い", romaji: "i" },
   { char: "う", romaji: "u" },
@@ -74,32 +76,49 @@ const quiz = [
   { char: "ぽ", romaji: "po" },
 ];
 
+const getInitialQuestionQueue = (): Question[] => {
+  const queue: Question[] = [];
+  while (queue.length < 5) {
+    const nextIndex = Math.floor(Math.random() * quiz.length);
+    if (!queue.includes(quiz[nextIndex])) {
+      queue.push(quiz[nextIndex]);
+    }
+  }
+  return queue;
+};
+
 function App() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [text, setText] = useState("");
-  const [question, setQuestion] = useState(quiz[0]);
+  const [questionQueue, setQuestionQueue] = useState(getInitialQuestionQueue());
 
   useEffect(() => {
     inputRef.current?.focus();
   }, [inputRef]);
 
   useEffect(() => {
-    if (text === question.romaji) {
-      // Random next question
+    if (text === questionQueue[0].romaji) {
+      // Correct answer, move to next question
       let nextIndex = Math.floor(Math.random() * quiz.length);
-      while (quiz[nextIndex] === question) {
+      while (questionQueue.includes(quiz[nextIndex])) {
         nextIndex = Math.floor(Math.random() * quiz.length);
       }
-      setQuestion(quiz[nextIndex]);
+      setQuestionQueue((prev) => [...prev.slice(1), quiz[nextIndex]]);
       setText("");
     }
-  }, [text, question]);
+  }, [text, questionQueue]);
 
   return (
     <div className="min-h-svh text-center flex flex-col items-center justify-center gap-8 p-4">
       <p className="opacity-50">Write out the character with latin alphabet</p>
       <div>
-        <span className="text-8xl">{question.char}</span>
+        <span className="text-8xl">{questionQueue[0].char}</span>
+        {questionQueue.length > 1 &&
+          questionQueue
+            .slice(1)
+            .map((question) => (
+              <span className="text-4xl opacity-50 ml-4">{question.char}</span>
+            ))}
       </div>
       <div className="card">
         <input
@@ -108,22 +127,6 @@ function App() {
           value={text}
           onChange={(e) => {
             setText(e.target.value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (text === question.romaji) {
-                // Random next question
-                let nextIndex = Math.floor(Math.random() * quiz.length);
-                while (quiz[nextIndex] === question) {
-                  nextIndex = Math.floor(Math.random() * quiz.length);
-                }
-                setQuestion(quiz[nextIndex]);
-                setText("");
-              } else {
-                alert("Wrong answer, try again!");
-                setText("");
-              }
-            }
           }}
         />
       </div>
