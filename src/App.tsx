@@ -91,6 +91,7 @@ function App() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [text, setText] = useState("");
   const [questionQueue, setQuestionQueue] = useState(getInitialQuestionQueue());
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -99,26 +100,47 @@ function App() {
   useEffect(() => {
     if (text === questionQueue[0].romaji) {
       // Correct answer, move to next question
-      let nextIndex = Math.floor(Math.random() * quiz.length);
-      while (questionQueue.includes(quiz[nextIndex])) {
-        nextIndex = Math.floor(Math.random() * quiz.length);
-      }
-      setQuestionQueue((prev) => [...prev.slice(1), quiz[nextIndex]]);
-      setText("");
+      setIsAnimating(true);
+      
+      setTimeout(() => {
+        let nextIndex = Math.floor(Math.random() * quiz.length);
+        while (questionQueue.includes(quiz[nextIndex])) {
+          nextIndex = Math.floor(Math.random() * quiz.length);
+        }
+        setQuestionQueue((prev) => [...prev.slice(1), quiz[nextIndex]]);
+        setText("");
+        setTimeout(() => setIsAnimating(false), 50);
+      }, 300);
     }
   }, [text, questionQueue]);
 
   return (
     <div className="min-h-svh text-center flex flex-col items-center justify-center gap-8 p-4">
       <p className="opacity-50">Write out the character with latin alphabet</p>
-      <div>
-        <span className="text-8xl">{questionQueue[0].char}</span>
-        {questionQueue.length > 1 &&
-          questionQueue
-            .slice(1)
-            .map((question) => (
-              <span className="text-4xl opacity-50 ml-4">{question.char}</span>
-            ))}
+      <div className="flex items-center justify-center overflow-hidden relative">
+        {questionQueue.map((question, index) => (
+          <span
+            key={question.char + question.romaji}
+            style={{
+              animation: isAnimating 
+                ? index === 0 
+                  ? 'fadeOutLeft 0.3s ease-out forwards' 
+                  : index === questionQueue.length - 1 
+                    ? 'slideInFromRight 0.5s ease-out'
+                    : index === 1
+                      ? 'scaleUp 0.5s ease-out'
+                      : 'none'
+                : 'none'
+            }}
+            className={`transition-all duration-500 ease-in-out ${
+              index === 0
+                ? "text-8xl"
+                : "text-4xl opacity-50 ml-4"
+            }`}
+          >
+            {question.char}
+          </span>
+        ))}
       </div>
       <div className="card">
         <input
